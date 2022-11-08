@@ -15,7 +15,7 @@ class MyApp extends StatelessWidget {
       home: const Homepage(),
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
-        fontFamily: 'Roboto-Bold',
+        fontFamily: 'Corben-Bold',
       ),
     );
   }

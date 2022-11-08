@@ -38,26 +38,32 @@ class _HomepageState extends State<Homepage> {
                   builder: (context, value, child) {
                     return Container(
                       color: value.appColor,
-                      child: SizedBox(
-                        height: screenHeight*0.08,
-                        child:  Align(
-                              alignment: Alignment.center,   
-                              child: Padding(
-                                padding: const EdgeInsets.all(12.0),
-                                child: Row(
-                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    IconButton(onPressed: (){                                
-                                      setState(() {                                  
-                                         drawerOpen = true;
-                                      });
-                                    }, icon: const Icon(Icons.menu, color: Colors.white,)),
-                                    Text('Todo, Weather & Theme',style: TextStyle(color: Colors.white.withOpacity(0.9), fontSize: 18),),
-                                    IconButton(onPressed: (){}, icon: const Icon(Icons.search, color: Colors.white38,))
-                                  ],
+                      child: OrientationBuilder(
+                        builder: (BuildContext context, Orientation orientation) {
+                           
+                          return SizedBox(
+                          height: (orientation == Orientation.portrait)? screenHeight*0.1 : screenHeight*0.15,
+                          child:  Align(
+                                alignment: Alignment.center,   
+                                child: Padding(
+                                  padding: const EdgeInsets.all(12.0),
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      IconButton(onPressed: (){                                
+                                        setState(() {                                  
+                                           drawerOpen = true;
+                                        });
+                                      }, icon: const Icon(Icons.menu, color: Colors.white,)),
+                                      Text('Todo-Weather App',style: TextStyle(color: Colors.white.withOpacity(0.9), fontSize: 18),),
+                                      IconButton(onPressed: (){}, icon: const Icon(Icons.search, color: Colors.white38,))
+                                    ],
+                                  ),
                                 ),
                               ),
-                            ),
+                           );
+                         },
+                        
                       ),
                     );
                   }
@@ -88,8 +94,8 @@ class _HomepageState extends State<Homepage> {
                        child: Padding(
                          padding: const EdgeInsets.only(bottom: 8.0),
                          child: SizedBox(
-                          height: screenHeight*0.1,
-                          width: screenWidth*0.8,
+                          height: screenHeight*0.25,
+                          width: screenWidth,
                           child: GestureDetector(
                             onTap: (){
                               Navigator.of(context).push(
@@ -100,9 +106,16 @@ class _HomepageState extends State<Homepage> {
                             },
                             child: Consumer<ColorThemeNotifier>(
                               builder: (context, value, child) {
-                                return CustomPaint(
-                                  painter: AddPainter(value.appColor),
-                                  child: const Icon(Icons.add,size: 40, color: Colors.white,),
+                                return ClipPath(
+                                  clipper: AddButton(),
+                                  child: Container(
+                                    color: value.appColor,
+                                    child: const Center(
+                                      child: Icon(Icons.add, 
+                                      size: 30,
+                                      color: Colors.white,)),
+                                  ),
+                                
                                 );
                               }
                             ),
