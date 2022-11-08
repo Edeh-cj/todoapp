@@ -103,31 +103,26 @@ Widget drawerWidget (double width_, double drawerOffset, BuildContext context){
 }
 
 // AddButton
-class AddPainter extends CustomPainter{
-  final Color color;
-
-  AddPainter(this.color);
+class AddButton extends CustomClipper<Path>{
+  
   @override
-  void paint(Canvas canvas, Size size) {
-    Path path_ = Path()
-    ..moveTo(0.6*size.width, 0.33*size.height)
-    ..lineTo(0.525*size.width, 0.067*size.height)
-    ..quadraticBezierTo(0.5*size.width, 0, 0.475*size.width, 0.067*size.height)
-    ..lineTo(0.4*size.width, 0.33*size.height)
-    ..lineTo(0.4*size.width, 0.67*size.height)
-    ..lineTo(0.475*size.width, 0.93*size.height)
-    ..quadraticBezierTo(0.5*size.width, size.height, 0.525*size.width, 0.93*size.height)
-    ..lineTo(0.6*size.width, 0.67*size.height)
-    ..close();
-    Paint paint_ =Paint()..color= color;
-    canvas.drawShadow(path_, Colors.black12, 20, false);
-    canvas.drawPath(path_, paint_);
-
+  getClip(Size size) {
+     Path path = Path()
+      ..addRRect(RRect.fromRectAndRadius(
+        Rect.fromCenter(
+          center: Offset(size.width/2, size.height/2), 
+          width: 75, 
+          height: 75),
+          const Radius.circular(30)
+          ),
+        );
+    return path;
   }
-
+  
   @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) {
+  bool shouldReclip(covariant CustomClipper<Path> oldClipper) {
+    // TODO: implement shouldReclip
     return false;
   }
-
 }
+
