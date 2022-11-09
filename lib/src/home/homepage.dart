@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:todo_mobile_application/provider/appcolor.dart';
 import 'package:todo_mobile_application/provider/todolist.dart';
 import 'package:todo_mobile_application/provider/weather.dart';
@@ -24,212 +25,181 @@ class _HomepageState extends State<Homepage> {
     double screenHeight = MediaQuery.of(context).size.height;
     double screenWidth = MediaQuery.of(context).size.width;
         
-    return Scaffold(
-      body: SafeArea(
-        child: Stack(
-          children: [
-                    
-            Column(
-              mainAxisAlignment: MainAxisAlignment.start,
+    return Consumer<ColorThemeNotifier>(
+      builder: (context, value, child) {
+        return Scaffold(
+          appBar: AppBar(
+            leading: IconButton(icon: const Icon(Icons.menu), 
+            onPressed: (){
+              setState(() {
+                drawerOpen=true;
+              });
+
+            },),
+            backgroundColor: value.appColor,
+          ),
+          body: SafeArea(
+            child: Stack(
               children: [
-      
-                //           AppBar
-                Consumer<ColorThemeNotifier>(
-                  builder: (context, value, child) {
-                    return Container(
-                      color: value.appColor,
-                      child: OrientationBuilder(
-                        builder: (BuildContext context, Orientation orientation) {
-                           
-                          return SizedBox(
-                          height: (orientation == Orientation.portrait)? screenHeight*0.1 : screenHeight*0.15,
-                          child:  Align(
-                                alignment: Alignment.center,   
-                                child: Padding(
-                                  padding: const EdgeInsets.all(12.0),
-                                  child: Row(
-                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                    children: [
-                                      IconButton(onPressed: (){                                
-                                        setState(() {                                  
-                                           drawerOpen = true;
-                                        });
-                                      }, icon: const Icon(Icons.menu, color: Colors.white,)),
-                                      Text('Todo-Weather App',style: TextStyle(color: Colors.white.withOpacity(0.9), fontSize: 18),),
-                                      IconButton(onPressed: (){}, icon: const Icon(Icons.search, color: Colors.white38,))
-                                    ],
-                                  ),
-                                ),
-                              ),
-                           );
-                         },
                         
-                      ),
-                    );
-                  }
-                ),
-      
-      
-                Expanded(
-                  child: Stack(                    
-                    children: [
-                     Consumer<TodoNotifier>(
-                       builder: (context, value, child) {
-                         return ListView.builder(
-                          itemCount: value.todoList.length, 
-                          itemBuilder: (context, index) {
-                            return todoTile(
-                              value.todoList[index],
-                              callbackRemove: () {
-                                Provider.of<TodoNotifier>(context, listen: false).deleteTodo(index);
-                              },   
-                              color: Colors.grey                         
-                            );
-                          }
-                          );
-                       }
-                     ),
-                     Align(
-                      alignment: Alignment.bottomCenter,
-                       child: Padding(
-                         padding: const EdgeInsets.only(bottom: 8.0),
-                         child: SizedBox(
-                          height: screenHeight*0.25,
-                          width: screenWidth,
-                          child: GestureDetector(
-                            onTap: (){
-                              Navigator.of(context).push(
-                                MaterialPageRoute(
-                                  builder: ((context) => const EditingPage())//*********** */
-                                )
+                Column(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  children: [                   
+          
+                    Expanded(
+                      child: Stack(                    
+                        children: [
+                         Consumer<TodoNotifier>(
+                           builder: (context, value, child) {
+                             return ListView.builder(
+                              itemCount: value.todoList.length, 
+                              itemBuilder: (context, index) {
+                                return todoTile(
+                                  value.todoList[index],
+                                  callbackRemove: () {
+                                    Provider.of<TodoNotifier>(context, listen: false).deleteTodo(index);
+                                  },   
+                                  color: Colors.grey                         
+                                );
+                              }
                               );
-                            },
-                            child: Consumer<ColorThemeNotifier>(
+                           }
+                         ),
+                         Align(
+                          alignment: Alignment.bottomCenter,
+                           child: Padding(
+                             padding: const EdgeInsets.only(bottom: 8.0),
+                             child: SizedBox(
+                              height: screenHeight*0.25,
+                              width: screenWidth,
+                              child: GestureDetector(
+                                onTap: (){
+                                  Navigator.of(context).push(
+                                    MaterialPageRoute(
+                                      builder: ((context) => const EditingPage())//*********** */
+                                    )
+                                  );
+                                },
+                                child: ClipPath(
+                                      clipper: AddButton(),
+                                      child: Container(
+                                        color: value.appColor,
+                                        child: const Center(
+                                          child: Icon(Icons.add, 
+                                          size: 30,
+                                          color: Colors.white,)),
+                                      ),
+                                   )                                                                  //
+                              ),
+                             ),
+                           ),
+                         ),                        
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+          
+                //              Drawer
+                
+               Transform.translate(    
+              offset: Offset(drawerOpen? 0: -screenWidth, 0),
+              child: Row(
+            children: [
+              Container(
+                width: screenWidth*0.7,
+                alignment: Alignment.centerLeft,
+                color: Colors.white,
+                child: ListView(
+                          children: [
+                            Consumer<ColorThemeNotifier>(
                               builder: (context, value, child) {
-                                return ClipPath(
-                                  clipper: AddButton(),
-                                  child: Container(
-                                    color: value.appColor,
-                                    child: const Center(
-                                      child: Icon(Icons.add, 
-                                      size: 30,
-                                      color: Colors.white,)),
+                                return DrawerHeader(
+                                  decoration: BoxDecoration(
+                                    color: value.appColor
                                   ),
-                                
+                                  child: Container(),
                                 );
                               }
                             ),
-                          ),
-                         ),
-                       ),
-                     ),
-                    //  ElevatedButton(
-                    //   onPressed: () => Provider.of<WeatherNotifier>(context, listen: false).getweather(), 
-                    //   child: Text('weather'))
-                    ],
+                            Consumer<WeatherNotifier>(
+                              builder: (context, value, child) {
+                                return ListTile(
+                                  title: Text(value.city),
+                                  leading: value.icon,
+                                  subtitle: Text('${value.temp} ${value.description}'),
+                                );
+                              }
+                            ),
+                            const ListTile(
+                              leading: Icon(Icons.person),
+                              trailing: Icon(Icons.arrow_forward_ios),
+                              title: Text('My Account'),
+                            ),
+                            const ListTile(
+                              leading: Icon(Icons.done_all),
+                              trailing: Icon(Icons.arrow_forward_ios),
+                              title: Text('Done List'),
+              
+                            ),
+                            const ListTile(
+                              leading: Icon(Icons.translate),
+                              trailing: Icon(Icons.arrow_forward_ios),
+                              title: Text('Change Language'),
+                            ),
+                            ListTile(
+                              leading: const Icon(Icons.palette),
+                              trailing: const Icon(Icons.arrow_forward_ios),
+                              title: const Text('Change Theme'),
+                              onTap: (){
+                                  Navigator.of(context).push(
+                                    MaterialPageRoute(
+                                      builder: ((context) => const ThemesPage())
+                                    )
+                                  );
+                              },
+                            ),
+                            const ListTile(
+                              leading: Icon(Icons.feed),
+                              trailing: Icon(Icons.arrow_forward_ios),
+                              title: Text('Feedback Wall'),
+                            ),
+                            ListTile(
+                              leading: const Icon(Icons.settings),
+                              trailing: const Icon(Icons.arrow_forward_ios),
+                              onTap: (){
+                                Navigator.of(context).push(
+                                  MaterialPageRoute(
+                                    builder: ((context) => const SettingsPage())
+                                  )
+                                );
+                              },
+                              title: Text('Settings'),
+                            ),
+              
+                          ],
+                        ),
+              ),
+              Expanded(
+                child: GestureDetector(
+                  onTap: () {
+                    setState(() {
+                      drawerOpen = false;
+                    });
+                  },
+                  child: Container(
+                    color: Colors.black.withOpacity(0.2),
                   ),
                 ),
+              )
+            ],
+              ),
+            )
               ],
             ),
-      
-            //              Drawer
-            
-           Transform.translate(    
-          offset: Offset(drawerOpen? 0: -screenWidth, 0),
-          child: Row(
-        children: [
-          Container(
-            width: screenWidth*0.7,
-            alignment: Alignment.centerLeft,
-            color: Colors.white,
-            child: ListView(
-                      children: [
-                        Consumer<ColorThemeNotifier>(
-                          builder: (context, value, child) {
-                            return DrawerHeader(
-                              decoration: BoxDecoration(
-                                color: value.appColor
-                              ),
-                              child: Container(),
-                            );
-                          }
-                        ),
-                        Consumer<WeatherNotifier>(
-                          builder: (context, value, child) {
-                            return ListTile(
-                              title: Text(value.city),
-                              leading: value.icon,
-                              subtitle: Text('${value.temp} ${value.description}'),
-                            );
-                          }
-                        ),
-                        const ListTile(
-                          leading: Icon(Icons.person),
-                          trailing: Icon(Icons.arrow_forward_ios),
-                          title: Text('My Account'),
-                        ),
-                        const ListTile(
-                          leading: Icon(Icons.done_all),
-                          trailing: Icon(Icons.arrow_forward_ios),
-                          title: Text('Done List'),
-          
-                        ),
-                        const ListTile(
-                          leading: Icon(Icons.translate),
-                          trailing: Icon(Icons.arrow_forward_ios),
-                          title: Text('Change Language'),
-                        ),
-                        ListTile(
-                          leading: const Icon(Icons.palette),
-                          trailing: const Icon(Icons.arrow_forward_ios),
-                          title: const Text('Change Theme'),
-                          onTap: (){
-                              Navigator.of(context).push(
-                                MaterialPageRoute(
-                                  builder: ((context) => const ThemesPage())
-                                )
-                              );
-                          },
-                        ),
-                        const ListTile(
-                          leading: Icon(Icons.feed),
-                          trailing: Icon(Icons.arrow_forward_ios),
-                          title: Text('Feedback Wall'),
-                        ),
-                        ListTile(
-                          leading: const Icon(Icons.settings),
-                          trailing: const Icon(Icons.arrow_forward_ios),
-                          onTap: (){
-                            Navigator.of(context).push(
-                              MaterialPageRoute(
-                                builder: ((context) => const SettingsPage())
-                              )
-                            );
-                          },
-                          title: Text('Settings'),
-                        ),
-          
-                      ],
-                    ),
           ),
-          Expanded(
-            child: GestureDetector(
-              onTap: () {
-                setState(() {
-                  drawerOpen = false;
-                });
-              },
-              child: Container(
-                color: Colors.black.withOpacity(0.2),
-              ),
-            ),
-          )
-        ],
-          ),
-        )
-          ],
-        ),
-      ),
+        );
+      }
     );
   }
 }

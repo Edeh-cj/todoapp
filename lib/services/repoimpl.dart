@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'dart:developer';
 import 'package:todo_mobile_application/models/weathermodel.dart';
 import 'package:todo_mobile_application/repository/repo_.dart';
 import 'package:todo_mobile_application/services/geolocator.dart';
@@ -11,30 +10,23 @@ class RepoImpl implements Repository{
  @override
   Future<Weathermodel> getWeather() async{
     var weatherapikey = 'ba24c6018ddd72041749018d0c1b1ef8';
+    
 
-    try {
-  Position position = await Geo.getPosition();
+    try { 
+      Position? position = await Geo.getPosition(); 
+      http.Response response = 
+      await http.get(Uri.parse('https://api.openweathermap.org/data/2.5/weather?lat=${position?.latitude}&lon=${position?.longitude}&appid=$weatherapikey&units=metric'));
   
-  http.Response response = 
-  await http.get(Uri.parse('https://api.openweathermap.org/data/2.5/weather?lat=${position.latitude}&lon=${position.longitude}&appid=$weatherapikey&units=metric'));
-  
-  switch (response.statusCode) {
-    case 200: {      
-      return Weathermodel.fromJson(jsonDecode(response.body));}
+      switch (response.statusCode) {
+        case 200: {      
+          return Weathermodel.fromJson(jsonDecode(response.body));}
        
-    default: throw Exception(response.reasonPhrase);
-  }
+        default: throw (response.statusCode);
+      }
 
-
-} on Exception catch (e) {
-  rethrow;
-}
-    
-    
-    
-  }
-  
-  
+    } catch (e) {print(e); rethrow;}
+     
+  }  
   
 }
 
