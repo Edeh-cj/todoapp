@@ -15,14 +15,15 @@ class WeatherNotifier extends ChangeNotifier{
 
   getweather() async{
 
-    Weathermodel dto = await locator<Repository>().getWeather();
-    _city = dto.city;
-    _description = dto.description;
-    _temp = '${(dto.temp).round()}°C';
-    _icon = weathericons(dto.iconcode);
+    try{
+      Weathermodel dto = await locator<Repository>().getWeather();
+      _city = dto.city;
+      _description = dto.description;
+      _temp = '${(dto.temp).round()}°C';
+      _icon = weathericons(dto.iconcode);
+    } catch(e) {rethrow;}
     
     notifyListeners();
-
   }
 }
 
